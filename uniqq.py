@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import yaml
 import smtplib
@@ -35,6 +36,11 @@ def sendmail(results):
         s.sendmail(login_username, email, msg)
 
 def main():
+    # Check if file exists
+    if not os.path.exists(old_file):
+        with open(old_file, "w+") as f:
+            pass
+
     # Previouse file of domains
     b = []
     with open(old_file, "r") as f:
