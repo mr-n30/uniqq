@@ -10,11 +10,13 @@ from email.message import EmailMessage
 parser = argparse.ArgumentParser(description="Get difference between 2 files. One from stdin and one from argv[1].")
 parser.add_argument("file", help="Old file to campare against your new file (stdin)")
 parser.add_argument("-e", "--email", help="Email to alert of new data found")
-parser.add_argument("-c", "--config", help="Email to alert of new data found")
+parser.add_argument("-s", "--subject", help="Subject of the email")
+parser.add_argument("-c", "--config", help="Yaml file containing your email and password to login")
 
-args     = parser.parse_args()
-email    = args.email
-old_file = args.file
+args        = parser.parse_args()
+subject     = args.subject
+email       = args.email
+old_file    = args.file
 yaml_config = args.config
 
 def sendmail(results):
@@ -23,8 +25,8 @@ def sendmail(results):
 
     login_username = yaml_data["username"][0]
     login_password = yaml_data["password"][0]
-
-    msg = "Subject: New subdomain(s) found\n\n"
+    
+    msg = f"Subject: {subject}\n\n"
 
     for result in results:
         msg = msg + result
@@ -54,9 +56,11 @@ def main():
     results = list(set(a) - set(b))
 
     if results:
-        if email and yaml_config:
+        if email and yaml_config and subject:
             sendmail(results)
-
+        else:
+            print("Missing one more required arguments: --subject|--config|--email")
+            
         for result in results:
             print(result.strip())
             sys.stdout.flush()
