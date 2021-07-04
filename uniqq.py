@@ -7,15 +7,13 @@ import argparse
 from email.message import EmailMessage
 
 # Parse arguments
-parser = argparse.ArgumentParser(description="Get difference between 2 files. One from stdin and one from argv[1].")
-parser.add_argument("file", help="Old file to campare against your new file (stdin)")
-parser.add_argument("-e", "--email", help="Email to alert of new data found")
-parser.add_argument("-s", "--subject", help="Subject of the email")
-parser.add_argument("-c", "--config", help="Yaml file containing your email and password to login")
+parser = argparse.ArgumentParser(description="Get difference between 2 files. One from stdin and one from `file`.")
+parser.add_argument("file", help="File to campare against your new file from `stdin`")
+parser.add_argument("-s", "--subject", help="Subject of the email", required=True)
+parser.add_argument("-c", "--config", help="Yaml file containing your email, password, and email to alert", required=True)
 
 args        = parser.parse_args()
 subject     = args.subject
-email       = args.email
 old_file    = args.file
 yaml_config = args.config
 
@@ -23,9 +21,10 @@ def sendmail(results):
     with open(yaml_config, 'r') as f:
         yaml_data = yaml.safe_load(f)
 
-    login_username = yaml_data["username"][0]
-    login_password = yaml_data["password"][0]
-    
+    username  = yaml_data["username"][0]
+    password  = yaml_data["password"][0]
+    recipient = yaml_data["recipient"][0]
+
     msg = f"Subject: {subject}\n\n"
 
     for result in results:
@@ -34,8 +33,8 @@ def sendmail(results):
     # Send the message
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
-        s.login(login_username, login_password)
-        s.sendmail(login_username, email, msg)
+        s.login(username, password)
+        s.sendmail(username, email, msg)
 
 def main():
     # Check if file exists
@@ -55,22 +54,12 @@ def main():
 
     results = list(set(a) - set(b))
 
-    if results:
-        if email and yaml_config and subject:
-            sendmail(results)
-        else:
-            print("Missing one more required arguments: --subject|--config|--email")
-            
-        for result in results:
-            print(result.strip())
-            sys.stdout.flush()
+    if len(results) > 0:
+        sendmail(results)
 
         # Append new subdomains to previous file
         with open(old_file, "a") as f:
             f.writelines(results)
-    else:
-        print("Nothing here")
-        sys.stdout.flush()
 
 if __name__ == "__main__":
     main()
