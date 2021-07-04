@@ -34,7 +34,7 @@ def sendmail(results):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
         s.login(username, password)
-        s.sendmail(username, email, msg)
+        s.sendmail(username, recipient, msg)
 
 def main():
     # Check if file exists
