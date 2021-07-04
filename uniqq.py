@@ -37,11 +37,6 @@ def sendmail(results):
         s.sendmail(username, recipient, msg)
 
 def main():
-    # Check if file exists
-    if not os.path.exists(old_file):
-        with open(old_file, "w+") as f:
-            pass
-
     # Previouse file of domains
     b = []
     with open(old_file, "r") as f:
@@ -58,7 +53,7 @@ def main():
         sendmail(results)
 
         # Append new subdomains to previous file
-        with open(old_file, "a") as f:
+        with open(old_file, "a+") as f:
             f.writelines(results)
 
 if __name__ == "__main__":
