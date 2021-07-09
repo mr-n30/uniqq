@@ -50,6 +50,9 @@ def main():
     results = list(set(a) - set(b))
 
     if len(results) > 0:
+        # Output the results to the terminal
+        [print(f"{result.strip()}") for result in results]
+
         sendmail(results)
 
         # Append new subdomains to previous file
